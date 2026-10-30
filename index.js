@@ -15,6 +15,18 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Create New Event
+app.post('/api/events', async (req, res) => {
+    const data = req.body;
+
+    data.date = new Date(data.date);
+    data.createdAt = new Date();
+
+    const result = await eventsCollection.insertOne(data);
+
+    res.send(result);
+});
+
 // Request and Response
 app.get('/', (req, res) => {
     res.send('Hello World from express.js!');

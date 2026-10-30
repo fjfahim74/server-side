@@ -29,6 +29,37 @@ app.get('/api/events', async (req, res) => {
     res.send(result);
 });
 
+
+app.get('/api/events/home', async (req, res) => {
+    const result = await eventsCollection
+        .find({ date: { $gte: new Date() } })
+        .sort({ date: 1 })
+        .limit(6)
+        .toArray();
+
+    res.send(result);
+});
+
+// Get Single Event
+app.get('/api/events/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).send({ message: 'Invalid event ID' });
+    }
+
+    const result = await eventsCollection.findOne({
+        _id: new ObjectId(id),
+    });
+
+    if (!result) {
+        return res.status(404).send({ message: 'Event not found' });
+    }
+
+    res.send(result);
+});
+
+
 // MongoDB Connection
 async function connectDB() {
     try {

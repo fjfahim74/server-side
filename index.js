@@ -146,6 +146,20 @@ app.delete('/api/events/:id', async (req, res) => {
     res.send(result);
 });
 
+app.patch('/api/events/:id', async (req, res) => {
+    const { id } = req.params;
+    const data = req.body;
+
+    data.date = new Date(data.date);
+
+    const result = await eventsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: data },
+    );
+
+    res.json(result);
+});
+
 // MongoDB Connection
 async function connectDB() {
     try {

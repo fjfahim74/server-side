@@ -27,6 +27,17 @@ app.post('/api/events', async (req, res) => {
     res.send(result);
 });
 
+// Join an Event
+app.post('/api/event-joins', async (req, res) => {
+    const data = req.body;
+
+    data.joinedAt = new Date();
+
+    const result = await eventJoinsCollection.insertOne(data);
+
+    res.send(result);
+});
+
 // Request and Response
 app.get('/', (req, res) => {
     res.send('Hello World from express.js!');

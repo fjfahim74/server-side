@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGO_DB_URL);
 const db = client.db('project');
@@ -28,8 +28,20 @@ app.post('/api/events', async (req, res) => {
 });
 
 // Join an Event
+// Join an Event
 app.post('/api/event-joins', async (req, res) => {
     const data = req.body;
+
+    const existingJoin = await eventJoinsCollection.findOne({
+        eventId: data.eventId,
+        userEmail: data.userEmail,
+    });
+
+    if (existingJoin) {
+        return res.status(409).send({
+            message: 'You have already joined this event!',
+        });
+    }
 
     data.joinedAt = new Date();
 

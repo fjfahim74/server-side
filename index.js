@@ -119,6 +119,32 @@ app.get('/api/events/:id', async (req, res) => {
     res.send(result);
 });
 
+//Getting mY Events
+app.get('/api/my-events/:email', async (req, res) => {
+    const email = req.params.email;
+
+    const result = await eventsCollection
+        .find({ creatorEmail: email })
+        .sort({ date: 1 })
+        .toArray();
+
+    res.send(result);
+});
+
+// Delete an Event
+app.delete('/api/events/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const result = await eventsCollection.deleteOne({
+        _id: new ObjectId(id),
+    });
+
+    await eventJoinsCollection.deleteMany({
+        eventId: id,
+    });
+
+    res.send(result);
+});
 
 // MongoDB Connection
 async function connectDB() {

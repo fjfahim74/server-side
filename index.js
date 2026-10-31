@@ -28,7 +28,6 @@ app.post('/api/events', async (req, res) => {
 });
 
 // Join an Event
-// Join an Event
 app.post('/api/event-joins', async (req, res) => {
     const data = req.body;
 
@@ -43,9 +42,35 @@ app.post('/api/event-joins', async (req, res) => {
         });
     }
 
+    const event = await eventsCollection.findOne({
+        _id: new ObjectId(data.eventId),
+    });
+
+    if (!event) {
+        return res.status(404).send({
+            message: 'Event not found',
+        });
+    }
+
+    data.eventDate = event.date;
+    data.eventCategory = event.category;
+    data.eventLocation = event.location;
+
     data.joinedAt = new Date();
 
     const result = await eventJoinsCollection.insertOne(data);
+
+    res.send(result);
+});
+
+// Get Joined Events by User Email
+app.get('/api/event-joins/:email', async (req, res) => {
+    const email = req.params.email;
+
+    const result = await eventJoinsCollection
+        .find({ userEmail: email })
+        .sort({ eventDate: 1 })
+        .toArray();
 
     res.send(result);
 });

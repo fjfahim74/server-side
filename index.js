@@ -12,6 +12,14 @@ const eventJoinsCollection = db.collection('eventJoins');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const verifyApi = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    console.log("Authorization Header:", authHeader);
+
+    next();
+};
+
 app.use(cors());
 app.use(express.json());
 
@@ -64,7 +72,7 @@ app.post('/api/event-joins', async (req, res) => {
 });
 
 // Get Joined Events by User Email
-app.get('/api/event-joins/:email', async (req, res) => {
+app.get('/api/event-joins/:email', verifyApi, async (req, res) => {
     const email = req.params.email;
 
     const result = await eventJoinsCollection

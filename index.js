@@ -30,6 +30,7 @@ const verifyApi = async (req, res, next) => {
 
     try {
         const { payload } = await jwtVerify(token, JWKS);
+        req.user = payload;
         next();
     } catch (error) {
         return res.status(401).send({ msg: "Unauthorized!" });
@@ -52,7 +53,7 @@ app.post('/api/events', async (req, res) => {
 });
 
 // Join an Event
-app.post('/api/event-joins', async (req, res) => {
+app.post('/api/event-joins', verifyApi, async (req, res) => {
     const data = req.body;
 
     const existingJoin = await eventJoinsCollection.findOne({
@@ -144,8 +145,8 @@ app.get('/api/events/:id', async (req, res) => {
 });
 
 //Getting mY Events
-app.get('/api/my-events/:email', async (req, res) => {
-    const email = req.params.email;
+app.get('/api/my-events/:email', verifyApi, async (req, res) => {
+    const email = req.user.email;
 
     const result = await eventsCollection
         .find({ creatorEmail: email })
@@ -156,7 +157,7 @@ app.get('/api/my-events/:email', async (req, res) => {
 });
 
 // Delete an Event
-app.delete('/api/events/:id', async (req, res) => {
+app.delete('/api/events/:id', verifyApi, async (req, res) => {
     const { id } = req.params;
 
     const result = await eventsCollection.deleteOne({

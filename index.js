@@ -104,10 +104,14 @@ app.get('/api/event-joins/:email', verifyApi, async (req, res) => {
 app.get('/', (req, res) => {
     res.send('Hello World from express.js!');
 });
+
 // Get All Upcoming Events
 app.get('/api/events', async (req, res) => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     const result = await eventsCollection
-        .find({ date: { $gte: new Date() } })
+        .find({ date: { $gte: today } })
         .sort({ date: 1 })
         .toArray();
 
@@ -116,8 +120,11 @@ app.get('/api/events', async (req, res) => {
 
 
 app.get('/api/events/home', async (req, res) => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
     const result = await eventsCollection
-        .find({ date: { $gte: new Date() } })
+        .find({ date: { $gte: today } })
         .sort({ date: 1 })
         .limit(6)
         .toArray();
@@ -162,11 +169,14 @@ app.delete('/api/events/:id', verifyApi, async (req, res) => {
 
     const result = await eventsCollection.deleteOne({
         _id: new ObjectId(id),
+        creatorEmail: req.user.email,
     });
 
-    await eventJoinsCollection.deleteMany({
-        eventId: id,
-    });
+    if (result.deletedCount > 0) {
+        await eventJoinsCollection.deleteMany({
+            eventId: id,
+        });
+    }
 
     res.send(result);
 });
@@ -178,7 +188,10 @@ app.patch('/api/events/:id', verifyApi, async (req, res) => {
     data.date = new Date(data.date);
 
     const result = await eventsCollection.updateOne(
-        { _id: new ObjectId(id) },
+        {
+            _id: new ObjectId(id),
+            creatorEmail: req.user.email,
+        },
         { $set: data },
     );
 

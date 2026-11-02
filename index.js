@@ -41,7 +41,7 @@ app.use(cors());
 app.use(express.json());
 
 // Create New Event
-app.post('/api/events', async (req, res) => {
+app.post('/api/events', verifyApi, async (req, res) => {
     const data = req.body;
 
     data.date = new Date(data.date);
@@ -171,7 +171,7 @@ app.delete('/api/events/:id', verifyApi, async (req, res) => {
     res.send(result);
 });
 
-app.patch('/api/events/:id', async (req, res) => {
+app.patch('/api/events/:id', verifyApi, async (req, res) => {
     const { id } = req.params;
     const data = req.body;
 
